@@ -6,7 +6,7 @@ from .. import model
 from .. import schema
 from .. import security
 from .. import autho
-router = APIRouter()
+router = APIRouter(tags=["admin login"])
 
 
 @router.post("/admin_create")
@@ -20,7 +20,7 @@ def admin_create(new_admin:schema.admin_create,db:Session = Depends(get_db),
     return new_obj
 
 @router.get("/admin/list",response_model = list[schema.admin_response])
-def admin_list(db:Session = Depends(get_db)):
+def admin_list(db:Session = Depends(get_db),user_id:int = Depends(autho.get_current_user)):
     admin_list = db.query(model.adminuser).all()
     return admin_list
 
