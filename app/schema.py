@@ -26,6 +26,13 @@ class admin_power(BaseModel):
     total_seats_occupied:int
 
 class input_person(BaseModel):
+    user_id:int
     in_out:bool
     
     
+class dashboard_return(BaseModel):
+    total_seats:int
+    seats_not_available:int
+    seats_occupied:int
+    seats_available:int
+

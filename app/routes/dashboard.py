@@ -8,13 +8,24 @@ from .. import security,autho
 router = APIRouter(tags=["Dasboard"])
 
 
-@router.get("/dashboard")
+@router.get("/dashboard",response_model=schema.dashboard_return)
 def dashboard(db:Session = Depends(get_db),user_id:int = Depends(autho.get_current_user)):
     seats = db.query(model.total_seats).order_by(model.total_seats.time.desc()).first()
     total_seats = seats.total_seats
     seats_not_available = seats.total_seats_occupied
+    bigu = db.query(model.database_inout).filter(model.database_inout.time >="2025-03-25 08:30:00.000000").order_by(model.database_inout.user_id.desc()).all()
+    smallu = db.query(model.database_inout).filter(model.database_inout.time >="2025-03-25 08:30:00.000000").order_by(model.database_inout.user_id).all()
     
-    return {"total_seats":total_seats,"seats_not_available":seats_not_available,"seats_available":seats_available}
+    seats_sum = 0
+    for i in range(smallu[0].user_id,bigu[0].user_id+1):
+        value = db.query(model.database_inout).filter(model.database_inout.user_id == i).count()
+        if(value%2 != 0):
+            seats_sum += 1
+
+    seats_available = total_seats - seats_sum-seats_not_available
+    return {"total_seats":total_seats,"seats_not_available":seats_not_available,"seats_occupied":seats_sum,"seats_available":seats_available}
+    
+   # return {"total_seats":total_seats,"seats_not_available":seats_not_available,"seats_available":seats_available}
 
 
 @router.post("/dashboard/in")
