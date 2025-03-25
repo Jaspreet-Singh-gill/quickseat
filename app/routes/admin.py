@@ -34,6 +34,15 @@ def admin_delete_me(db:Session = Depends(get_db),user_id:int = Depends(autho.get
     post.delete(synchronize_session = False)
     db.commit()
 
+@router.post("/admin/dashboard")
+def admin_dashboard(data:schema.admin_power,db:Session = Depends(get_db),
+                    user_id:int = Depends(autho.get_current_user)):
+    new_obj = model.total_seats(**(data.dict()))
+    db.add(new_obj)
+    db.commit()
+    db.refresh(new_obj)
+    return new_obj
+
 @router.delete("/admin/{username}",status_code = status.HTTP_204_NO_CONTENT)
 def admin_delete(username:str,db:Session = Depends(get_db),user_id:int = Depends(autho.get_current_user)):
     post =db.query(model.adminuser).filter(model.adminuser.username == username)
@@ -41,4 +50,7 @@ def admin_delete(username:str,db:Session = Depends(get_db),user_id:int = Depends
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,detail = "This admin does not exist")
     post.delete(synchronize_session = False)
     db.commit()
+
+
+
     

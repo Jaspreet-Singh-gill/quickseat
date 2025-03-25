@@ -20,4 +20,12 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id:Optional[str] = None
+
+class admin_power(BaseModel):
+    total_seats:int
+    total_seats_occupied:int
+
+class input_person(BaseModel):
+    in_out:bool
+    
     
