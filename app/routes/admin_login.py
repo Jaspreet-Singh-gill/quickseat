@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from .. import model
 from .. import security
+from .. import autho
 router = APIRouter(tags=["admin login"])
 
 
@@ -23,7 +24,7 @@ def admin_login(user_details:OAuth2PasswordRequestForm = Depends(),db:Session = 
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,detail = "wrong credentials")
     if not security.verify_password(user_details.password,user.password):
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,detail = "wrong credentials")
-    return {"message":"Login successful"}    
+    return autho.create_token(data={"username":user.username,"user_id":user.id})  
 
     
 
