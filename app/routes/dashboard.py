@@ -30,6 +30,22 @@ def dashboard(db:Session = Depends(get_db),user_id:int = Depends(autho.get_curre
 
 @router.post("/dashboard/in")
 def input_user(data: schema.input_person, db: Session = Depends(get_db)):
-    new_person = model.database_inout(current_status=data.in_out)
+    new_person = model.database_inout(current_status=data.in_out,user_id=data.user_id)
     db.add(new_person)
     db.commit()
+
+
+
+@router.post("/dashboard/get")                                            
+def input_user(data:schema.input_person, db: Session = Depends(get_db)):
+  new_person = (
+        db.query(model.database_inout)
+        .filter(model.database_inout.user_id == data.user_id)
+        .order_by(model.database_inout.time.desc())
+        .first()
+    )
+  if new_person is None:
+        return {"status": "not found"}  # Handle case when no record exists
+  
+  return {"status": new_person.current_status}
+
