@@ -49,3 +49,22 @@ def input_user(data:schema.input_person, db: Session = Depends(get_db)):
   
   return {"status": new_person.current_status}
 
+@router.post("/anaytics")
+def anaytics(data:schema.anaylytics_return,db:Session = Depends(get_db),user_id:int = Depends(autho.get_current_user)):
+    HOUR_1 = data.hour
+    HOUR_2 = data.hour + 1
+    day =data.date
+    start_date = f"2025-03-{str(day)} {str(HOUR_1)}:00:00"
+    end_date = f"2025-03-{str(day)} {str(HOUR_2)}:00:00"
+
+    #post = db.query(model.database_inout).filter(model.database_inout.time >= start_date,model.database_inout.time <= end_date).all()
+    smallu = db.query(model.database_inout).filter(model.database_inout.time >= start_date,model.database_inout.time <= end_date).order_by(model.database_inout.user_id).all()
+    bigu = db.query(model.database_inout).filter(model.database_inout.time >= start_date,model.database_inout.time <= end_date).order_by(model.database_inout.user_id.desc()).all()
+    seats_sum = 0
+    if not smallu or not bigu:
+        return {"error": "No data found for the given date and hour"}
+    for i in range(smallu[0].user_id,bigu[0].user_id+1):
+        value = db.query(model.database_inout).filter(model.database_inout.user_id == i).count()
+        if(value%2 != 0):
+            seats_sum += 1
+    return{"seats available":seats_sum}

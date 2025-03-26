@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -15,6 +16,12 @@
             <p><strong>Seats Available:</strong> <span id="seats-available">Loading...</span></p>
             <p><strong>Seats Not Available:</strong> <span id="seats-not-available">Loading...</span></p>
         </div>
+        
+        <h3>Analytics</h3>
+        <input type="date" id="analytics-date" placeholder="Select Date">
+        <button onclick="fetchAnalytics()">Generate Graph</button>
+        <canvas id="analyticsChart"></canvas>
+        
         <button onclick="logoutUser()">Logout</button>
     </div>
     <script>
@@ -29,9 +36,7 @@
             try {
                 const response = await fetch("http://127.0.0.1:8000/dashboard", {
                     method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
+                    headers: { "Authorization": `Bearer ${token}` }
                 });
 
                 if (!response.ok) {
@@ -47,6 +52,54 @@
                 alert("Error fetching dashboard data. Please try again.");
                 console.error(error);
             }
+        }
+        
+        async function fetchAnalytics() {
+            const token = localStorage.getItem("jwt_token");
+            const date = document.getElementById("analytics-date").value;
+            if (!token || !date) {
+                alert("Please enter a date and login first.");
+                return;
+            }
+            let labels = [];
+            let dataPoints = [];
+            for (let hour = 0; hour < 24; hour++) {
+                const response = await fetch("http://127.0.0.1:8000/anaytics", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ date: parseInt(date.split('-')[2]), hour })
+                });
+                const data = await response.json();
+                labels.push(`${hour}:00`);
+                dataPoints.push(data["seats available"] || 0);
+            }
+            drawChart(labels, dataPoints);
+        }
+        
+        function drawChart(labels, dataPoints) {
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Seats Available',
+                        data: dataPoints,
+                        borderColor: 'blue',
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: 'Hour of the Day' } },
+                        y: { title: { display: true, text: 'Seats Available' }, beginAtZero: true }
+                    }
+                }
+            });
         }
         
         function logoutUser() {

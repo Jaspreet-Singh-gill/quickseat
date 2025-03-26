@@ -3,7 +3,7 @@
 URL_IN="http://127.0.0.1:8000/dashboard/in"
 URL_INO="http://127.0.0.1:8000/dashboard/get"
 
-for i in {1..100}
+for i in {21..100}
 do
     JSON_DATA="{\"user_id\": $i, \"in_out\": true}"
     curl -X POST "$URL_IN" \
@@ -30,7 +30,7 @@ do
         echo "Updated user $k status to $STATUS"
     fi
 
-    sleep 4
+    sleep $(( RANDOM % 100 + 1 ))
 done
 
 echo "Done!"

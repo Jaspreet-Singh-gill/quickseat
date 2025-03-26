@@ -36,3 +36,8 @@ class dashboard_return(BaseModel):
     seats_occupied:int
     seats_available:int
 
+class anaylytics_return(BaseModel):
+    date:int
+    hour:int
+
+    
