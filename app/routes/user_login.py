@@ -23,7 +23,7 @@ def user_login(user_details:OAuth2PasswordRequestForm = Depends(),db:Session = D
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,detail = "wrong credentials")
     if not security.verify_password(user_details.password,user.password):
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,detail = "wrong credentials")
-    return   autho.create_token(data={"username":user.username,"user_id":user.id})
+    return  autho.create_token(data={"username":user.username,"user_id":user.id})
 
 @router.delete("/user/deleteme",status_code = status.HTTP_204_NO_CONTENT)
 def user_delete_me(db:Session = Depends(get_db),user_id:int = Depends(autho.get_current_user)):

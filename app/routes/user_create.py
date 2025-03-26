@@ -14,4 +14,4 @@ def create_user(new_user:schema.user_create,db:Session = Depends(get_db)):
     db.add(new_obj)
     db.commit()
     db.refresh(new_obj)
-    return new_obj
+    return {"success":True}

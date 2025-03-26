@@ -3,6 +3,8 @@ from .database import Base
 from datetime import datetime
 from sqlalchemy import Boolean
 from sqlalchemy import TIMESTAMP
+from sqlalchemy import text
+
 class adminuser(Base):
     __tablename__ = "adminuser"
 
@@ -26,7 +28,7 @@ class database_inout(Base):
     id = Column(Integer, primary_key=True, nullable= False)
     current_status = Column(Boolean,nullable=
                             False)
-    time = Column(TIMESTAMP(timezone=False), default=datetime.now(),nullable=False)
+    time = Column(TIMESTAMP(timezone=False), server_default=text("NOW()"),nullable=False)
     user_id = Column(Integer,nullable=False)
 
 class total_seats(Base):

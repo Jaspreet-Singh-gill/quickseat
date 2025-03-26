@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Library Seat Availability Dashboard</h2>
+        <div id="dashboard" class="dashboard-box">
+            <p><strong>Total Seats:</strong> <span id="total-seats">Loading...</span></p>
+            <p><strong>Seats Occupied:</strong> <span id="seats-occupied">Loading...</span></p>
+            <p><strong>Seats Available:</strong> <span id="seats-available">Loading...</span></p>
+            <p><strong>Seats Not Available:</strong> <span id="seats-not-available">Loading...</span></p>
+        </div>
+        <button onclick="logoutUser()">Logout</button>
+    </div>
+    <script>
+        async function fetchDashboardData() {
+            const token = localStorage.getItem("jwt_token");
+            if (!token) {
+                alert("You are not logged in! Redirecting to login page.");
+                window.location.href = "login.html";
+                return;
+            }
+            
+            try {
+                const response = await fetch("http://127.0.0.1:8000/dashboard", {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch dashboard data");
+                }
+                
+                const data = await response.json();
+                document.getElementById("total-seats").textContent = data.total_seats;
+                document.getElementById("seats-occupied").textContent = data.seats_occupied;
+                document.getElementById("seats-available").textContent = data.seats_available;
+                document.getElementById("seats-not-available").textContent = data.seats_not_available;
+            } catch (error) {
+                alert("Error fetching dashboard data. Please try again.");
+                console.error(error);
+            }
+        }
+        
+        function logoutUser() {
+            localStorage.removeItem("jwt_token");
+            window.location.href = "login.html";
+        }
+        
+        window.onload = fetchDashboardData;
+    </script>
+</body>
+</html>
