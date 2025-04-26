@@ -1,8 +1,9 @@
-pip install fastapi
-pip install uvicorn
-pip install python-jose
-pip install sqlalchemy
-pip install psycopg2-binary
-pip install pydantic
-pip install passlib
-pip install bcrypt
+
+fastapi
+uvicorn
+python-jose
+sqlalchemy
+psycopg2-binary
+pydantic
+passlib
+bcrypt
