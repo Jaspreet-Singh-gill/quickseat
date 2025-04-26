@@ -34,7 +34,7 @@
             }
             
             try {
-                const response = await fetch("http://127.0.0.1:8000/dashboard", {
+                const response = await fetch("http://127.0.0.1:8000/dashboard_1", {
                     method: "GET",
                     headers: { "Authorization": `Bearer ${token}` }
                 });
@@ -64,7 +64,7 @@
             let labels = [];
             let dataPoints = [];
             for (let hour = 0; hour < 24; hour++) {
-                const response = await fetch("http://127.0.0.1:8000/anaytics", {
+                const response = await fetch("http://127.0.0.1:8000/anaytics_1", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

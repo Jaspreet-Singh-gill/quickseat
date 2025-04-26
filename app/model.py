@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float
-from .database import Base
+from .database import Base,engine
 from datetime import datetime
 from sqlalchemy import Boolean
 from sqlalchemy import TIMESTAMP
@@ -38,9 +38,28 @@ class total_seats(Base):
     total_seats_occupied = Column(Integer,nullable=False)
     time = Column(String, default=datetime.now(),nullable=False)
 
+class count_seats(Base):
+    __tablename__ = "count_seats"
+    id = Column(Integer, primary_key=True, nullable= False)
+    current_count = Column(Integer,nullable=
+                            False)
+    time = Column(TIMESTAMP(timezone=False), server_default=text("NOW()"),nullable=False)
+
+class count_live(Base):
+    __tablename__ = "count_live"
+    id = Column(Integer, primary_key=True, nullable= False)
+    current_count = Column(Integer,nullable=
+                            False)
+    time = Column(TIMESTAMP(timezone=False), server_default=text("NOW()"),nullable=False)
+
+
+
+
+
 
 
 
 
 
     
+Base.metadata.create_all(bind=engine)
