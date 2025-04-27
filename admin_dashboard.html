@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - QUICK SEAT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+        }
+        .sidebar-header p {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        .nav-links {
+            flex: 1;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .nav-link i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        .logout {
+            padding: 12px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+        }
+        .logout a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .logout a:hover {
+            color: white;
+        }
+        .logout i {
+            margin-right: 10px;
+        }
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            color: #2c3e50;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn i {
+            margin-right: 8px;
+        }
+        .libraries-list {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .library-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .library-item:last-child {
+            border-bottom: none;
+        }
+        .library-info {
+            flex: 1;
+        }
+        .library-info h3 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .library-info p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .library-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .edit-btn, .delete-btn {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .edit-btn {
+            color: #3498db;
+        }
+        .edit-btn:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        .delete-btn {
+            color: #e74c3c;
+        }
+        .delete-btn:hover {
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            color: #2c3e50;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-group input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .cancel-btn {
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+        }
+        .cancel-btn:hover {
+            background-color: #ddd;
+        }
+        .admins-list {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-top: 30px;
+        }
+        .admin-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .admin-item:last-child {
+            border-bottom: none;
+        }
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>QUICK SEAT</h2>
+            <p>Admin Dashboard</p>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#" class="nav-link active" data-page="libraries">
+                <i>📚</i> Libraries
+            </a>
+            <a href="#" class="nav-link" data-page="admins">
+                <i>👥</i> Manage Admins
+            </a>
+            <a href="#" class="nav-link" data-page="statistics">
+                <i>📊</i> Statistics
+            </a>
+            <a href="#" class="nav-link" data-page="settings">
+                <i>⚙️</i> Settings
+            </a>
+        </div>
+        
+        <div class="logout">
+            <a href="index.html">
+                <i>🚪</i> Logout
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <!-- Libraries Page -->
+        <div class="content-page active" id="libraries-page">
+            <div class="page-header">
+                <h1>Manage Libraries</h1>
+                <button class="btn" id="addLibraryBtn">
+                    <i>➕</i> Add Library
+                </button>
+            </div>
+            
+            <div class="libraries-list" id="librariesList">
+                <!-- Library items will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Admins Page -->
+        <div class="content-page" id="admins-page" style="display: none;">
+            <div class="page-header">
+                <h1>Manage Administrators</h1>
+                <button class="btn" id="addAdminBtn">
+                    <i>➕</i> Add Admin
+                </button>
+            </div>
+            
+            <div class="admins-list" id="adminsList">
+                <!-- Admin items will be loaded here -->
+            </div>
+        </div>
+        
+        
+        <!-- Statistics Page -->
+        <div class="content-page" id="statistics-page" style="display: none;">
+            <div class="page-header">
+                <h1>Usage Statistics</h1>
+            </div>
+            
+            <p>Statistics dashboard coming soon...</p>
+        </div>
+        
+        <!-- Settings Page -->
+        <div class="content-page" id="settings-page" style="display: none;">
+            <div class="page-header">
+                <h1>System Settings</h1>
+            </div>
+            
+            <p>Settings options coming soon...</p>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Library Modal -->
+    <div class="modal" id="libraryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Library</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            
+            <form id="libraryForm">
+                <input type="hidden" id="libraryId">
+                
+                <div class="form-group">
+                    <label for="libraryName">Library Name</label>
+                    <input type="text" id="libraryName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="totalSeats">Total Seats</label>
+                    <input type="number" id="totalSeats" min="1" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn cancel-btn" id="cancelLibrary">Cancel</button>
+                    <button type="submit" class="btn" id="saveLibrary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Admin Modal -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="adminModalTitle">Add Administrator</h2>
+                <button class="close-btn" id="closeAdminModal">&times;</button>
+            </div>
+            
+            <form id="adminForm">
+                <input type="hidden" id="adminId">
+                
+                <div class="form-group">
+                    <label for="adminName">Full Name</label>
+                    <input type="text" id="adminName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminUsername">Username</label>
+                    <input type="text" id="adminUsername" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminPassword">Password</label>
+                    <input type="password" id="adminPassword" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn cancel-btn" id="cancelAdmin">Cancel</button>
+                    <button type="submit" class="btn" id="saveAdmin">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Sample data
+        let libraries = [
+            {
+                id: 1,
+                name: "Central Library",
+                totalSeats: 200,
+                availableSeats: 45
+            },
+            {
+                id: 2,
+                name: "Science Library",
+                totalSeats: 150,
+                availableSeats: 12
+            },
+            {
+                id: 3,
+                name: "Law Library",
+                totalSeats: 100,
+                availableSeats: 67
+            },
+            {
+                id: 4,
+                name: "Medical Library",
+                totalSeats: 80,
+                availableSeats: 30
+            }
+        ];
+        
+        let admins = [
+            {
+                id: 1,
+                name: "Admin User",
+                username: "admin",
+                password: "admin123"
+            }
+        ];
+        
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Hide all content pages
+                document.querySelectorAll('.content-page').forEach(page => {
+                    page.style.display = 'none';
+                });
+                
+                // Show the selected page
+                const pageId = this.dataset.page + '-page';
+                document.getElementById(pageId).style.display = 'block';
+            });
+        });
+        
+        // Libraries Management
+        function loadLibraries() {
+            const librariesList = document.getElementById('librariesList');
+            librariesList.innerHTML = '';
+            
+            libraries.forEach(library => {
+                const item = document.createElement('div');
+                item.className = 'library-item';
+                item.innerHTML = `
+                    <div class="library-info">
+                        <h3>${library.name}</h3>
+                        <p>Total Seats: ${library.totalSeats} | Available Seats: ${library.availableSeats}</p>
+                    </div>
+                    <div class="library-actions">
+                        <button class="edit-btn" data-id="${library.id}">✏️</button>
+                        <button class="delete-btn" data-id="${library.id}">🗑️</button>
+                    </div>
+                `;
+                librariesList.appendChild(item);
+            });
+            
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editLibrary(this.dataset.id);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteLibrary(this.dataset.id);
+                });
+            });
+        }
+        
+        // Add Library
+        document.getElementById('addLibraryBtn').addEventListener('click', function() {
+            // Reset form
+            document.getElementById('libraryForm').reset();
+            document.getElementById('libraryId').value = '';
+            document.getElementById('modalTitle').textContent = 'Add Library';
+            
+            // Show modal
+            document.getElementById('libraryModal').classList.add('active');
+        });
+        
+        // Edit Library
+        function editLibrary(id) {
+            const library = libraries.find(lib => lib.id == id);
+            if (!library) return;
+            
+            // Fill form with library data
+            document.getElementById('libraryId').value = library.id;
+            document.getElementById('libraryName').value = library.name;
+            document.getElementById('totalSeats').value = library.totalSeats;
+            document.getElementById('modalTitle').textContent = 'Edit Library';
+            
+            // Show modal
+            document.getElementById('libraryModal').classList.add('active');
+        }
+        
+        // Delete Library
+        function deleteLibrary(id) {
+            if (confirm('Are you sure you want to delete this library?')) {
+                libraries = libraries.filter(lib => lib.id != id);
+                loadLibraries();
+            }
+        }
+        
+        // Save Library
+        document.getElementById('libraryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const libraryId = document.getElementById('libraryId').value;
+            const name = document.getElementById('libraryName').value;
+            const totalSeats = parseInt(document.getElementById('totalSeats').value);
+            
+            if (libraryId) {
+                // Update existing library
+                const index = libraries.findIndex(lib => lib.id == libraryId);
+                if (index !== -1) {
+                    libraries[index].name = name;
+                    libraries[index].totalSeats = totalSeats;
+                    // Keep the current available seats or adjust if needed
+                    libraries[index].availableSeats = Math.min(libraries[index].availableSeats, totalSeats);
+                }
+            } else {
+                // Add new library
+                const newLibrary = {
+                    id: libraries.length > 0 ? Math.max(...libraries.map(lib => lib.id)) + 1 : 1,
+                    name: name,
+                    totalSeats: totalSeats,
+                    availableSeats: totalSeats // New libraries start with all seats available
+                };
+                libraries.push(newLibrary);
+            }
+            
+            // Close modal and refresh list
+            document.getElementById('libraryModal').classList.remove('active');
+            loadLibraries();
+        });
+        
+        // Close Library Modal
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('libraryModal').classList.remove('active');
+        });
+        
+        document.getElementById('cancelLibrary').addEventListener('click', function() {
+            document.getElementById('libraryModal').classList.remove('active');
+        });
+        
+        // Admins Management
+        function loadAdmins() {
+            const adminsList = document.getElementById('adminsList');
+            adminsList.innerHTML = '';
+            
+            admins.forEach(admin => {
+                const item = document.createElement('div');
+                item.className = 'admin-item';
+                
+                // Get initials for avatar
+                const initials = admin.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                
+                item.innerHTML = `
+                    <div class="admin-info">
+                        <div class="admin-avatar">${initials}</div>
+                        <div>
+                            <h3>${admin.name}</h3>
+                            <p>Username: ${admin.username}</p>
+                        </div>
+                    </div>
+                    <div class="library-actions">
+                        <button class="edit-btn edit-admin-btn" data-id="${admin.id}">✏️</button>
+                        <button class="delete-btn delete-admin-btn" data-id="${admin.id}">🗑️</button>
+                    </div>
+                `;
+                adminsList.appendChild(item);
+            });
+            
+            // Add event listeners
+            document.querySelectorAll('.edit-admin-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editAdmin(this.dataset.id);
+                });
+            });
+            
+            document.querySelectorAll('.delete-admin-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteAdmin(this.dataset.id);
+                });
+            });
+        }
+        
+        // Add Admin
+        document.getElementById('addAdminBtn').addEventListener('click', function() {
+            // Reset form
+            document.getElementById('adminForm').reset();
+            document.getElementById('adminId').value = '';
+            document.getElementById('adminModalTitle').textContent = 'Add Administrator';
+            
+            // Show modal
+            document.getElementById('adminModal').classList.add('active');
+        });
+
+        function addAdmin(id, name, username, password) {
+            const exists = admins.some(admin => admin.username === username);
+            if (exists) {
+                console.log("Username already exists!");
+                return;
+            }
+
+            admins.push({
+            id: id,
+            name: name,
+            username: username,
+            password: password
+            });
+        }   
+
+        
+        // Edit Admin
+        function editAdmin(id) {
+            const admin = admins.find(a => a.id == id);
+            if (!admin) return;
+            
+            // Fill form with admin data
+            document.getElementById('adminId').value = admin.id;
+            document.getElementById('adminName').value = admin.name;
+            document.getElementById('adminUsername').value = admin.username;
+            document.getElementById('adminPassword').value = admin.password;
+            document.getElementById('adminModalTitle').textContent = 'Edit Administrator';
+            
+            // Show modal
+            document.getElementById('adminModal').classList.add('active');
+        }
+        
+        // Delete Admin
+        function deleteAdmin(id) {
+            if (admins.length <= 1) {
+                alert('Cannot delete the last administrator account.');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this administrator?')) {
+                admins = admins.filter(a => a.id != id);
+                loadAdmins();
+            }
+        }
+        
+        // Save Admin
+        document.getElementById('adminForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const adminId = document.getElementById('adminId').value;
+        const name = document.getElementById('adminName').value;
+        const username = document.getElementById('adminUsername').value;
+        const password = document.getElementById('adminPassword').value;
+
+        if (!adminId) {
+            // Add new admin
+            const exists = admins.some(admin => admin.username === username);
+            if (exists) {
+                alert("Username already exists!");
+                return;
+            }
+
+            const newId = admins.length > 0 ? Math.max(...admins.map(a => a.id)) + 1 : 1;
+            admins.push({
+                id: newId,
+                name,
+                username,
+                password
+            });
+        } else {
+            // Update admin
+            const exists = admins.some(admin => admin.username === username && admin.id != Number(adminId));
+            if (exists) {
+                alert("Username already exists!");
+                return;
+            }
+
+            const index = admins.findIndex(admin => admin.id == adminId);
+            if (index !== -1) {
+                admins[index].name = name;
+                admins[index].username = username;
+                admins[index].password = password;
+            }
+        }
+
+        document.getElementById('adminModal').classList.remove('active');
+        loadAdmins();
+    });
+
+        
+        // Close Admin Modal
+        document.getElementById('closeAdminModal').addEventListener('click', function() {
+            document.getElementById('adminModal').classList.remove('active');
+        });
+        
+        document.getElementById('cancelAdmin').addEventListener('click', function() {
+            document.getElementById('adminModal').classList.remove('active');
+        });
+        
+        // Initialize the dashboard
+        window.addEventListener('load', function() {
+            loadLibraries();
+            loadAdmins();
+        });
+    </script>
+</body>
+</html>
