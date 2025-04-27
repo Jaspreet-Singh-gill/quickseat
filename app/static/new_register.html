@@ -135,7 +135,7 @@
     </style>
 </head>
 <body>
-    <a href="new_index.html" class="go-home">Back to Home</a>
+    <a href="/new_index.html" class="go-home">Back to Home</a>
     
     <div class="header-logo">
         <h1>QUICK SEAT</h1>
@@ -161,7 +161,7 @@
             <div class="error-message" id="registerError"></div>
             <div class="success-message" id="registerSuccess"></div>
             <div class="login-link">
-                <p>Already have an account? <a href="new_index.html">Login</a></p>
+                <p>Already have an account? <a href="/new_index.html">Login</a></p>
             </div>
         </form>
     </div>
@@ -202,7 +202,7 @@
             };
             
             try {
-                const response = await fetch('http://127.0.0.1:8000/user_create', {
+                const response = await fetch("/user_create", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -224,7 +224,7 @@
                 
                 // Redirect to login after 2 seconds
                 setTimeout(() => {
-                    window.location.href = 'new_index.html';
+                    window.location.href = '/new_index.html';
                 }, 2000);
                 
             } catch (error) {

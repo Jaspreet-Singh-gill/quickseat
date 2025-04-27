@@ -219,7 +219,7 @@
                 <button type="submit" class="login-submit">Login</button>
                 <div class="error-message" id="loginError"></div>
                 <div class="register-link">
-                    <p>Don't have an account? <a href="register.html">Register</a></p>
+                    <p>Don't have an account? <a href="/new_register.html">Register</a></p>
                 </div>
             </form>
         </div>
@@ -229,7 +229,7 @@
         <button class="logout-btn" id="logoutBtn">Logout</button>
         <h1>QUICK SEAT</h1>
         <p>Find available seats in your favorite libraries</p>
-        <button class="login-btn" id="adminLogin"> <a href="Admin_login.html" id="adminlogin">Admin Login</a></button>
+        <button class="login-btn" id="adminLogin"> <a href="/new_adminlogin.html" id="adminlogin">Admin Login</a></button>
     </header>
 
     <div class="container">
@@ -245,10 +245,13 @@
             if (token) {
                 document.getElementById('loginPopup').style.display = 'none';
                 document.getElementById('logoutBtn').style.display = 'block';
+                fetchDashboardData();
+                
             } else {
                 document.getElementById('loginPopup').style.display = 'flex';
                 document.getElementById('logoutBtn').style.display = 'none';
             }
+
         }
 
         // Handle user login
@@ -265,7 +268,7 @@
             formData.append('password', password);
             
             try {
-                const response = await fetch('http://127.0.0.1:8000/user_login', {
+                const response = await fetch('/user_login', {
                     method: 'POST',
                     body: formData
                 });
@@ -300,21 +303,66 @@
             checkAuth();
         });
 
+        async function fetchDashboardData() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        console.error('User not authenticated. Token missing.');
+        return;
+    }
+
+    try {
+        const response = await fetch("/dashboard_1", {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to fetch dashboard data');
+        }
+
+        const dashboardData = await response.json();
+        console.log('Dashboard Data:', dashboardData);
+
+        // You can now use dashboardData like:
+        // dashboardData.total_seats, dashboardData.seats_not_available, etc.
+
+        // Example: Displaying in console
+        console.log(`Total Seats: ${dashboardData.total_seats}`);
+        console.log(`Seats Occupied: ${dashboardData.seats_occupied}`);
+        console.log(`Seats Not Available: ${dashboardData.seats_not_available}`);
+        console.log(`Seats Available: ${dashboardData.seats_available}`);
+        libraries[2].totalSeats = dashboardData.total_seats;
+        console.log(libraries[1].totalSeats);
+        
+
+        // OR you can update DOM elements if you have any
+        // document.getElementById('totalSeats').innerText = dashboardData.total_seats;
+
+    } catch (error) {
+        console.error('Error fetching dashboard data:', error.message);
+    }
+}
+
+
         // Sample library data (modified to only include two libraries)
-        const libraries = [
+        let libraries = [
             {
                 id: 1,
                 name: "Central Library",
                 totalSeats: 200,
                 availableSeats: 45,
-                image: "/api/placeholder/400/320"
+                image: "https://media.istockphoto.com/id/1367269418/photo/public-library-indoors-bookshelves-full-of-books.jpg?s=612x612&w=0&k=20&c=g-fgpxq2XoPCFLmARq7AXGlV5Nx8TX8JsswWq2oK2Tk="
             },
             {
                 id: 2,
                 name: "NEW Library",
                 totalSeats: 150,
                 availableSeats: 12,
-                image: "/api/placeholder/400/320"
+                image: "https://www.nitj.ac.in/nitj_files/links/cc_lab1_04_13433.jpg"
             }
         ];
 
@@ -357,9 +405,21 @@
                 `;
                 
                 // Add click event to navigate to library details page
-                card.addEventListener('click', () => {
-                    window.location.href = `library.html?id=${library.id}`;
-                });
+                // Add click event to navigate to library details page
+card.addEventListener('click', () => {
+    if (library.name === "NEW Library") {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            // Pass token in URL
+            window.location.href = `/new_library.html?token=${encodeURIComponent(token)}`;
+        } else {
+            alert('You must be logged in to access this page.');
+        }
+    } else {
+        window.location.href = `/new_library.html?id=${library.id}`;
+    }
+});
+
                 
                 librariesGrid.appendChild(card);
             });
@@ -367,7 +427,7 @@
 
         // Admin login handler
         document.getElementById('adminLogin').addEventListener('click', () => {
-            window.location.href = 'admin-login.html';
+            window.location.href = '/new_adminlogin.html';
         });
 
         // Load libraries when page loads

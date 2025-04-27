@@ -6,6 +6,7 @@ from .. import model
 from .. import schema
 from .. import security
 from .. import autho
+from sqlalchemy import desc
 router = APIRouter(tags=["admin login"])
 
 
@@ -42,6 +43,14 @@ def admin_dashboard(data:schema.admin_power,db:Session = Depends(get_db),
     db.commit()
     db.refresh(new_obj)
     return new_obj
+
+@router.get("/admin/seats")
+def get_data(db:Session = Depends(get_db),user_id:int = Depends(autho.get_current_user)):
+    
+
+    new_obj = db.query(model.total_seats).order_by(desc(model.total_seats.id)).first()
+    return{"total_seats":new_obj.total_seats,"total_seats_occupied":new_obj.total_seats_occupied}
+
 
 @router.delete("/admin/{username}",status_code = status.HTTP_204_NO_CONTENT)
 def admin_delete(username:str,db:Session = Depends(get_db),user_id:int = Depends(autho.get_current_user)):

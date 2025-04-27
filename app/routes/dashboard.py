@@ -6,6 +6,9 @@ from .. import model
 from .. import schema
 from .. import security,autho
 router = APIRouter(tags=["Dasboard"])
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 
 @router.get("/dashboard",response_model=schema.dashboard_return)
