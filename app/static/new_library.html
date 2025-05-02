@@ -177,13 +177,18 @@
 
             try {
                 for (let hour = 0; hour < 24; hour++) {
+                    const dateParts = date.split('-');
                     const response = await fetch("/anaytics_1", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`
                         },
-                        body: JSON.stringify({ date: parseInt(date.split('-')[2]), hour })
+                        body: JSON.stringify({ 
+                            date: parseInt(dateParts[2]),
+                            month: parseInt(dateParts[1]), 
+                            hour 
+                        })
                     });
 
                     if (!response.ok) {

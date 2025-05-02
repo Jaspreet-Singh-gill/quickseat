@@ -130,8 +130,9 @@ def anaytics(data:schema.anaylytics_return,db:Session = Depends(get_db),user_id:
     HOUR_1 = data.hour
     HOUR_2 = data.hour + 1
     day =data.date
-    start_date = f"2025-04-{str(day)} {str(HOUR_1)}:00:00"
-    end_date = f"2025-04-{str(day)} {str(HOUR_2)}:00:00"
+    month = data.month
+    start_date = f"2025-{str(month)}-{str(day)} {str(HOUR_1)}:00:00"
+    end_date = f"2025-{str(month)}-{str(day)} {str(HOUR_2)}:00:00"
 
     #post = db.query(model.database_inout).filter(model.database_inout.time >= start_date,model.database_inout.time <= end_date).all()
     smallu = db.query(model.count_seats).filter(model.count_seats.time >= start_date,model.count_seats.time <= end_date).all()
@@ -151,3 +152,22 @@ def anaytics(data:schema.anaylytics_return,db:Session = Depends(get_db),user_id:
     else:
         data = 0
     return{"seats available":data}
+
+
+
+@router.get("/dashboard_2")
+def dashboard(db:Session = Depends(get_db)):
+    seats = db.query(model.total_seats).order_by(model.total_seats.time.desc()).first()
+    total_seats = seats.total_seats
+    seats_not_available = seats.total_seats_occupied
+    # bigu = db.query(model.database_inout).filter(model.database_inout.time >="2025-03-25 08:30:00.000000").order_by(model.database_inout.user_id.desc()).all()
+    # smallu = db.query(model.database_inout).filter(model.database_inout.time >="2025-03-25 08:30:00.000000").order_by(model.database_inout.user_id).all()
+    seats_count = db.query(model.count_live).first()
+    seats_sum = seats_count.current_count
+    # for i in range(smallu[0].user_id,bigu[0].user_id+1):
+    #     value = db.query(model.database_inout).filter(model.database_inout.user_id == i).count()
+    #     if(value%2 != 0):
+    #         seats_sum += 1
+
+    seats_available = total_seats - seats_sum-seats_not_available
+    return {"total_seats":total_seats,"seats_not_available":seats_not_available,"seats_occupied":seats_sum,"seats_available":seats_available}

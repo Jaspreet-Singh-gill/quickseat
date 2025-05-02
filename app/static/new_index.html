@@ -239,75 +239,98 @@
     </div>
 
     <script>
-        let seats_available1,total_seats1;
-        // Check if user is already logged in
-        function checkAuth() {
-            const token = localStorage.getItem('authToken');
-            if (token) {
-                document.getElementById('loginPopup').style.display = 'none';
-                document.getElementById('logoutBtn').style.display = 'block';
-                fetchDashboardData();
-                
-            } else {
-                document.getElementById('loginPopup').style.display = 'flex';
-                document.getElementById('logoutBtn').style.display = 'none';
-            }
+let seats_available1, total_seats1;
 
+// Sample library data (modified to only include two libraries)
+let libraries = [
+    {
+        id: 1,
+        name: "Central Library",
+        totalSeats: 200,
+        availableSeats: 45,
+        image: "https://media.istockphoto.com/id/1367269418/photo/public-library-indoors-bookshelves-full-of-books.jpg?s=612x612&w=0&k=20&c=g-fgpxq2XoPCFLmARq7AXGlV5Nx8TX8JsswWq2oK2Tk="
+    },
+    {
+        id: 2,
+        name: "NEW Library",
+        totalSeats: 150,
+        availableSeats: 12,
+        image: "https://www.nitj.ac.in/nitj_files/links/cc_lab1_04_13433.jpg"
+    }
+];
+
+// Check if user is already logged in
+function checkAuth() {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        document.getElementById('loginPopup').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'block';
+        fetchDashboardData();
+    } else {
+        document.getElementById('loginPopup').style.display = 'flex';
+        document.getElementById('logoutBtn').style.display = 'none';
+        // Still load libraries with default values if not logged in
+        loadLibraries();
+    }
+}
+
+// Handle user login
+document.getElementById('userLoginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorMsg = document.getElementById('loginError');
+    
+    // Create form data for the API call (OAuth2 format)
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password', password);
+    
+    try {
+        const response = await fetch('/user_login', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Login failed');
         }
+        
+        const data = await response.json();
+        
+        // Store the JWT token in localStorage for future API calls
+        localStorage.setItem('authToken', data.access_token || data);
+        
+        // Close the login popup
+        document.getElementById('loginPopup').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'block';
+        
+        // Reset form and error message
+        document.getElementById('userLoginForm').reset();
+        errorMsg.style.display = 'none';
+        
+        // Fetch dashboard data after successful login
+        fetchDashboardData();
+        
+    } catch (error) {
+        errorMsg.textContent = error.message;
+        errorMsg.style.display = 'block';
+    }
+});
 
-        // Handle user login
-        document.getElementById('userLoginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMsg = document.getElementById('loginError');
-            
-            // Create form data for the API call (OAuth2 format)
-            const formData = new FormData();
-            formData.append('username', username);
-            formData.append('password', password);
-            
-            try {
-                const response = await fetch('/user_login', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Login failed');
-                }
-                
-                const data = await response.json();
-                
-                // Store the JWT token in localStorage for future API calls
-                localStorage.setItem('authToken', data.access_token || data);
-                
-                // Close the login popup
-                document.getElementById('loginPopup').style.display = 'none';
-                document.getElementById('logoutBtn').style.display = 'block';
-                
-                // Reset form and error message
-                document.getElementById('userLoginForm').reset();
-                errorMsg.style.display = 'none';
-                
-            } catch (error) {
-                errorMsg.textContent = error.message;
-                errorMsg.style.display = 'block';
-            }
-        });
+// Handle logout
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    localStorage.removeItem('authToken');
+    checkAuth();
+});
 
-        // Handle logout
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            localStorage.removeItem('authToken');
-            checkAuth();
-        });
-
-        async function fetchDashboardData() {
+async function fetchDashboardData() {
     const token = localStorage.getItem('authToken');
     if (!token) {
         console.error('User not authenticated. Token missing.');
+        loadLibraries(); // Ensure libraries are loaded even if authentication fails
         return;
     }
 
@@ -321,152 +344,159 @@
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Failed to fetch dashboard data');
+            throw new Error('Failed to fetch dashboard data');
         }
 
         const dashboardData = await response.json();
-        console.log('Dashboard Data:', dashboardData);
+        console.log('Dashboard 1 Data:', dashboardData);
 
-        // You can now use dashboardData like:
-        // dashboardData.total_seats, dashboardData.seats_not_available, etc.
-
-        // Example: Displaying in console
-        console.log(`Total Seats: ${dashboardData.total_seats}`);
-        console.log(`Seats Occupied: ${dashboardData.seats_occupied}`);
-        console.log(`Seats Not Available: ${dashboardData.seats_not_available}`);
-        console.log(`Seats Available: ${dashboardData.seats_available}`);
         total_seats1 = dashboardData.total_seats;
-        seats_available1= dashboardData.seats_available;
+        seats_available1 = dashboardData.seats_available;
         
+        // After getting dashboard_1 data, fetch dashboard_2 data
+        try {
+            const response2 = await fetch("/dashboard_2", {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response2.ok) {
+                throw new Error('Failed to fetch dashboard_2 data');
+            }
+
+            const dashboard2Data = await response2.json();
+            console.log('Dashboard 2 Data:', dashboard2Data);
+
+            // Update Library ID 2 with real-time data from the API
+            libraries[1].totalSeats = dashboard2Data.total_seats;
+            libraries[1].availableSeats = dashboard2Data.seats_available;
+            
+        } catch (error) {
+            console.error('Error fetching dashboard_2 data:', error.message);
+            // Continue with default library 2 values
+        }
         
-
-        // OR you can update DOM elements if you have any
-        // document.getElementById('totalSeats').innerText = dashboardData.total_seats;
-
+        // Now load libraries with either updated or default values
+        loadLibraries();
+        
     } catch (error) {
         console.error('Error fetching dashboard data:', error.message);
+        loadLibraries(); // Ensure libraries are loaded even if API call fails
     }
 }
 
+// Function to determine status based on available percentage
+function getStatus(available, total) {
+    const percentage = (available / total) * 100;
+    if (percentage < 10) return "status-high";
+    if (percentage >10  && percentage < 40) return "status-medium";
+    return "status-low";
+}
 
-        // Sample library data (modified to only include two libraries)
-        let libraries = [
-            {
-                id: 1,
-                name: "Central Library",
-                totalSeats: 200,
-                availableSeats: 45,
-                image: "https://media.istockphoto.com/id/1367269418/photo/public-library-indoors-bookshelves-full-of-books.jpg?s=612x612&w=0&k=20&c=g-fgpxq2XoPCFLmARq7AXGlV5Nx8TX8JsswWq2oK2Tk="
-            },
-            {
-                id: 2,
-                name: "NEW Library",
-                totalSeats: 150,
-                availableSeats: 12,
-                image: "https://www.nitj.ac.in/nitj_files/links/cc_lab1_04_13433.jpg"
-            }
-        ];
+// Function to determine status text
+function getStatusText(available, total) {
+    const percentage = (available / total) * 100;
+    if (percentage < 10 ) return "High Rush";
+    if (percentage >10  && percentage < 40) return "Moderate Rush";
+    return "Low Rush";
+}
 
-        // Function to determine status based on available percentage
-        function getStatus(available, total) {
-            const percentage = (available / total) * 100;
-            if (percentage < 10) return "status-high";
-            if (percentage < 30) return "status-medium";
-            return "status-low";
-        }
-
-        // Function to determine status text
-        function getStatusText(available, total) {
-            const percentage = (available / total) * 100;
-            if (percentage < 10) return "High Rush";
-            if (percentage < 30) return "Moderate Rush";
-            return "Low Rush";
-        }
-
-        // Load libraries into the grid
-        function loadLibraries() {
-            const librariesGrid = document.getElementById('librariesGrid');
-            librariesGrid.innerHTML = '';
-            
-            libraries.forEach(library => {
-                const card = document.createElement('div');
-                card.className = 'library-card';
-                card.setAttribute('data-id', library.id);
-                
-                const statusClass = getStatus(seats_available1, total_seats1);
-                const statusText = getStatusText(seats_available1, total_seats1);
-                card.innerHTML = `
-                    <div class="library-image" style="background-image: url('${library.image}')"></div>
-                    <div class="library-info">
-                        <h3>${library.name}</h3>
-                        
-                        <p>Available Seats: ${library.availableSeats} / ${library.totalSeats}</p>
-                        <p class="status-indicator ${statusClass}">${statusText}</p>
-                    </div>
-                `;
-                
-                // Add click event to navigate to library details page
-                // Add click event to navigate to library details page
-card.addEventListener('click', () => {
-    if (library.name === "NEW Library") {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-            // Pass token in URL
-            window.location.href = `/new_library.html?token=${encodeURIComponent(token)}`;
-        } else {
-            alert('You must be logged in to access this page.');
-        }
-    } else {
-        window.location.href = `/new_library.html?id=${library.id}`;
+// Load libraries into the grid
+function loadLibraries() {
+    const librariesGrid = document.getElementById('librariesGrid');
+    if (!librariesGrid) {
+        console.error("Libraries grid element not found!");
+        return;
     }
+    
+    librariesGrid.innerHTML = '';
+    
+    libraries.forEach(library => {
+        const card = document.createElement('div');
+        card.className = 'library-card';
+        card.setAttribute('data-id', library.id);
+        
+        // Use the library's own available seats for status
+        const statusClass = getStatus(library.availableSeats, library.totalSeats);
+        const statusText = getStatusText(library.availableSeats, library.totalSeats);
+        
+        card.innerHTML = `
+            <div class="library-image" style="background-image: url('${library.image}')"></div>
+            <div class="library-info">
+                <h3>${library.name}</h3>
+                <p>Available Seats: ${library.availableSeats} / ${library.totalSeats}</p>
+                <p class="status-indicator ${statusClass}">${statusText}</p>
+            </div>
+        `;
+        
+        // Add click event to navigate to library details page
+        card.addEventListener('click', () => {
+            if (library.name === "NEW Library") {
+                const token = localStorage.getItem('authToken');
+                if (token) {
+                    // Pass token in URL
+                    window.location.href = `/new_library.html?token=${encodeURIComponent(token)}`;
+                } else {
+                    alert('You must be logged in to access this page.');
+                }
+            } else {
+                window.location.href = `/new_library.html?id=${library.id}`;
+            }
+        });
+        
+        librariesGrid.appendChild(card);
+    });
+    
+    console.log("Libraries loaded successfully");
+}
+
+// Admin login handler
+document.getElementById('adminLogin').addEventListener('click', () => {
+    window.location.href = '/new_adminlogin.html';
 });
 
-                
-                librariesGrid.appendChild(card);
-            });
-        }
+// Update data periodically
+function updateLibraryData() {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        // If logged in, fetch fresh data
+        fetchDashboardData();
+    } else {
+        // If not logged in, just update library 1 randomly
+        const library1 = libraries[0];
+        const change = Math.floor(Math.random() * 21) - 10;
+        library1.availableSeats = Math.max(0, Math.min(library1.totalSeats, library1.availableSeats + change));
+        loadLibraries();
+    }
+}
 
-        // Admin login handler
-        document.getElementById('adminLogin').addEventListener('click', () => {
-            window.location.href = '/new_adminlogin.html';
-        });
+// Update every 5 minutes
+setInterval(updateLibraryData, 300000);
 
-        // Load libraries when page loads
-        window.addEventListener('load', () => {
-            loadLibraries();
-            checkAuth();
-        });
+// Function to make authenticated API calls (for future use)
+async function authenticatedFetch(url, options = {}) {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        throw new Error('No authentication token found');
+    }
+    
+    // Set authorization header
+    const headers = options.headers || {};
+    headers['Authorization'] = `Bearer ${token}`;
+    
+    return fetch(url, {
+        ...options,
+        headers
+    });
+}
 
-        // Simulate updating data every 5 minutes
-        function simulateDataUpdate() {
-            libraries.forEach(library => {
-                // Random fluctuation in available seats (±10 as specified)
-                const change = Math.floor(Math.random() * 21) - 10;
-                library.availableSeats = Math.max(0, Math.min(library.totalSeats, library.availableSeats + change));
-            });
-            loadLibraries();
-        }
-
-        // Update every 5 minutes
-        setInterval(simulateDataUpdate, 300000);
-
-        // Function to make authenticated API calls (for future use)
-        async function authenticatedFetch(url, options = {}) {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                throw new Error('No authentication token found');
-            }
-            
-            // Set authorization header
-            const headers = options.headers || {};
-            headers['Authorization'] = `Bearer ${token}`;
-            
-            return fetch(url, {
-                ...options,
-                headers
-            });
-        }
+// Initialize page
+window.addEventListener('load', () => {
+    checkAuth();
+});
     </script>
 </body>
 </html>

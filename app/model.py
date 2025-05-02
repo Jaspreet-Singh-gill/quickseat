@@ -36,7 +36,7 @@ class total_seats(Base):
     id = Column(Integer, primary_key=True, nullable= False)
     total_seats = Column(Integer,nullable=False)
     total_seats_occupied = Column(Integer,nullable=False)
-    time = Column(String, default=datetime.now(),nullable=False)
+    time = Column(TIMESTAMP(timezone=False), server_default=text("NOW()"),nullable=False)
 
 class count_seats(Base):
     __tablename__ = "count_seats"

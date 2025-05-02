@@ -37,6 +37,7 @@ class dashboard_return(BaseModel):
     seats_available:int
 
 class anaylytics_return(BaseModel):
+    month:int
     date:int
     hour:int
 
