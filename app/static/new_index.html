@@ -239,6 +239,7 @@
     </div>
 
     <script>
+        let seats_available1,total_seats1;
         // Check if user is already logged in
         function checkAuth() {
             const token = localStorage.getItem('authToken');
@@ -335,8 +336,9 @@
         console.log(`Seats Occupied: ${dashboardData.seats_occupied}`);
         console.log(`Seats Not Available: ${dashboardData.seats_not_available}`);
         console.log(`Seats Available: ${dashboardData.seats_available}`);
-        libraries[2].totalSeats = dashboardData.total_seats;
-        console.log(libraries[1].totalSeats);
+        total_seats1 = dashboardData.total_seats;
+        seats_available1= dashboardData.seats_available;
+        
         
 
         // OR you can update DOM elements if you have any
@@ -392,13 +394,13 @@
                 card.className = 'library-card';
                 card.setAttribute('data-id', library.id);
                 
-                const statusClass = getStatus(library.availableSeats, library.totalSeats);
-                const statusText = getStatusText(library.availableSeats, library.totalSeats);
-                
+                const statusClass = getStatus(seats_available1, total_seats1);
+                const statusText = getStatusText(seats_available1, total_seats1);
                 card.innerHTML = `
                     <div class="library-image" style="background-image: url('${library.image}')"></div>
                     <div class="library-info">
                         <h3>${library.name}</h3>
+                        
                         <p>Available Seats: ${library.availableSeats} / ${library.totalSeats}</p>
                         <p class="status-indicator ${statusClass}">${statusText}</p>
                     </div>

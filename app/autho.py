@@ -10,7 +10,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 SECRET_KEY = "teri maa ki chut"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 2 
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
 
 
 def create_token(data:dict):
