@@ -1,17 +1,16 @@
+import requests
 import cv2
 import numpy as np
-from ultralytics import YOLO
 from collections import deque
-import requests
-import time
+from ultralytics import YOLO
 
 # Configuration
-VIDEO_SOURCE = "C:\\Users\\jaspr\\Downloads\\4750064-hd_1920_1080_30fps.mp4"
-ENTRY_API_URL = 'http://127.0.0.1:8000/person_in'
-EXIT_API_URL = 'http://127.0.0.1:8000/person_out'
+VIDEO_SOURCE = 'http://100.71.9.85:8080/video'
+ENTRY_API_URL = 'http://192.168.198.63:8000/person_in'
+EXIT_API_URL = 'http://192.168.198.63:8000/person_out'
 DIST_THRESHOLD = 50
 DISAPPEAR_FRAMES = 15  # frames after which a person is considered gone
-Y_MOVEMENT_THRESHOLD = 40
+X_MOVEMENT_THRESHOLD = 50  # Horizontal movement threshold (adjust as necessary)
 MAX_HISTORY = 10
 
 # Load YOLOv8 model
@@ -80,17 +79,21 @@ while cap.isOpened():
         last_seen[matched_id] = frame_index
         matched_ids.add(matched_id)
 
-    # Check for disappeared IDs
+    # Check for disappeared IDs and evaluate entry/exit
     for tid in list(track_history.keys()):
         if tid not in matched_ids and (frame_index - last_seen.get(tid, 0)) > DISAPPEAR_FRAMES:
-            if tid not in track_status:
-                history = track_history[tid]
-                if len(history) >= 5:
-                    y_movement = history[-1][1] - history[0][1]
-                    if y_movement > Y_MOVEMENT_THRESHOLD:
+            history = track_history[tid]
+            if len(history) >= 5:
+                # Calculate horizontal movement (left-right movement)
+                x_movement = history[-1][0] - history[0][0]
+
+                # If the person has moved horizontally enough
+                if x_movement < -X_MOVEMENT_THRESHOLD:  # Moving left (entry)
+                    if tid not in track_status:  # Ensure entry is counted only once
                         on_entry(tid)
                         track_status[tid] = 'entry'
-                    elif y_movement < -Y_MOVEMENT_THRESHOLD:
+                elif x_movement > X_MOVEMENT_THRESHOLD:  # Moving right (exit)
+                    if tid not in track_status:  # Ensure exit is counted only once
                         on_exit(tid)
                         track_status[tid] = 'exit'
 
@@ -105,6 +108,12 @@ while cap.isOpened():
             cv2.circle(frame, (cx, cy), 5, color, -1)
             cv2.putText(frame, label, (cx + 5, cy),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+
+    # Draw Entry and Exit counts on frame
+    cv2.putText(frame, f"Entries: {sum(1 for status in track_status.values() if status == 'entry')}", (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(frame, f"Exits: {sum(1 for status in track_status.values() if status == 'exit')}", (10, 70),
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
     cv2.imshow("Entry/Exit Detection", frame)
     if cv2.waitKey(1) == ord('q'):
