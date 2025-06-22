@@ -1,6 +1,6 @@
 Introduction:-
 
-backend program of project quickseat.Which helps its user to check the avialabilty of seats in the
+Project quickseat Which helps its user to check the avialabilty of seats in the
 library and book a slot of study in the library for a particular period of time.
 
 Its is implemented by using Fastapi,Postgress database,SQlalchemy,yolo,open cv ai models.
