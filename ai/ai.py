@@ -5,9 +5,9 @@ from collections import deque
 from ultralytics import YOLO
 
 # Configuration
-VIDEO_SOURCE = 'http://100.71.9.85:8080/video'
-ENTRY_API_URL = 'http://192.168.198.63:8000/person_in'
-EXIT_API_URL = 'http://192.168.198.63:8000/person_out'
+VIDEO_SOURCE = '[vidoe source url]/video'
+ENTRY_API_URL = '[ip address of your fast api server]/person_in'
+EXIT_API_URL = '[ip address of your fast api server]/person_out'
 DIST_THRESHOLD = 50
 DISAPPEAR_FRAMES = 15  # frames after which a person is considered gone
 X_MOVEMENT_THRESHOLD = 50  # Horizontal movement threshold (adjust as necessary)

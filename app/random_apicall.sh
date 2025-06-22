@@ -1,7 +1,10 @@
 #!/bin/bash
 
-URL_IN="http://127.0.0.1:8000/dashboard/in"
-URL_INO="http://127.0.0.1:8000/dashboard/get"
+
+#only use this script to the working of entire application
+#or if you can't run the Ai model then this can generate data for the web application
+URL_IN="[your ip adress ]/dashboard/in"
+URL_INO="[your ip adress]/dashboard/get"
 
 for i in {195..205}
 do

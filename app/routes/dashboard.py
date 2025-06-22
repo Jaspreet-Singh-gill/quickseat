@@ -137,7 +137,7 @@ def anaytics(data:schema.anaylytics_return,db:Session = Depends(get_db),user_id:
     #post = db.query(model.database_inout).filter(model.database_inout.time >= start_date,model.database_inout.time <= end_date).all()
     smallu = db.query(model.count_seats).filter(model.count_seats.time >= start_date,model.count_seats.time <= end_date).all()
 
-    print(smallu)
+    #print(smallu)
     seats_sum = 0
     k = 0
     if not smallu:
